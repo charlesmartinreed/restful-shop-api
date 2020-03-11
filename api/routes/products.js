@@ -7,9 +7,24 @@ const Product = require("../models/product");
 
 // PRODUCTS -- GET all
 router.get("/", (req, res, next) => {
-  res.status(200).json({
-    message: "GET request to /products received"
-  });
+  // where, limit, etc are valid params here
+  Product.find()
+    .exec()
+    .then(docs => {
+      console.log(docs);
+      res.status(200).json(docs);
+      // if (docs.length > 0) {
+      //   res.status(200).json(docs);
+      // } else {
+      //   // optional
+      //   res.status(404).json({
+      //     message: "No entries found"
+      //   })
+      // }
+    })
+    .catch(err => {
+      res.status(500).json({ error: err });
+    });
 });
 
 // PRODUCTS -- GET one, by id
@@ -71,17 +86,46 @@ router.post("/", (req, res, next) => {
 
 // PRODUCTS -- PATCH
 router.patch("/:prodId", (req, res, next) => {
-  res.status(200).json({
-    message: "Updated product",
-    id: req.params.prodId
-  });
+  const id = req.params.productId;
+
+  // creating a dynamic object that captures the altered values from the request params
+  const updateOps = {};
+  for (const ops of req.body) {
+    updateOps[ops.propName] = ops.value;
+  }
+
+  Product.findByIdAndUpdate({ _id: req.params.prodId }, { $set: updateOps })
+    .exec()
+    .then(result => {
+      console.log(result);
+      res.status(201).json(result);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({ error: err });
+    });
+  // res.status(200).json({
+  //   message: "Updated product",
+  //   id: req.params.prodId
+  // });
 });
 
 router.delete("/:prodId", (req, res, next) => {
-  res.status(200).json({
-    message: "Deleted product",
-    id: req.params.prodId
-  });
+  const id = req.params.prodId;
+
+  Product.findByIdAndDelete({ _id: id })
+    .exec()
+    .then(result => {
+      res.status(200).json(result);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({ error: err });
+    });
+  // res.status(200).json({
+  //   message: "Deleted product",
+  //   id: req.params.prodId
+  // });
 });
 
 // PRODUCTS -- DELETE
