@@ -10,6 +10,30 @@ const orderRoutes = require("./api/routes/orders");
 app.use(logger("dev")); // running morgan logger in "dev" mode - logs in the console
 
 // SUPPORTED ROUTES
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
+
+// CORS FIX
+app.use((req, res, next) => {
+  // add the neccessary headers when a res is sent - * allows access to any client
+  res.header("Access-Control-Allow-Origin", "*");
+
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
+  // sent by browser before POST or PUT request - used to check if operation is OK
+  if (req.method === "OPTIONS") {
+    res.header("Access-Control-Allow-Methods", "PUT, POST, PATCH, DELETE, GET");
+
+    // we don't need to go to our routes because the options request is just for discovering which operations are OK with our API server
+    return res.status(200).json({});
+  }
+
+  // allows the other routes to take over when the above code is not applicable
+  next();
+});
+
 app.use("/products", productRoutes);
 app.use("/orders", orderRoutes);
 

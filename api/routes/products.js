@@ -27,8 +27,11 @@ router.get("/:prodId", (req, res, next) => {
 
 // PRODUCTS -- POST
 router.post("/", (req, res, next) => {
+  const { name, price } = req.body;
+
   res.status(201).json({
-    message: "POST request to /products received"
+    message: "POST request to /products received",
+    createdProduct: { name, price }
   });
 });
 
