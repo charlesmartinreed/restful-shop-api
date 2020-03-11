@@ -1,9 +1,20 @@
 const express = require("express");
 const app = express();
 const logger = require("morgan");
+const mongoose = require("mongoose");
+const config = require("dotenv").config();
 
 const productRoutes = require("./api/routes/products");
 const orderRoutes = require("./api/routes/orders");
+// console.log(process.env.DB_USER, process.env.DB_PASS);
+// mongoose db connection
+mongoose.connect(
+  `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@october-xuadd.mongodb.net/test?retryWrites=true&w=majority`,
+  {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  }
+);
 
 // MIDDLEWARE - incoming requests pass through here
 
