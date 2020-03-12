@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
+const url = require("url");
 
 // import our Product model
 const Product = require("../models/product");
@@ -9,10 +10,24 @@ const Product = require("../models/product");
 router.get("/", (req, res, next) => {
   // where, limit, etc are valid params here
   Product.find()
+    .select("name price _id")
     .exec()
     .then(docs => {
-      console.log(docs);
-      res.status(200).json(docs);
+      const response = {
+        count: docs.length,
+        products: docs.map(doc => {
+          return {
+            name: doc.name,
+            price: doc.price,
+            _id: doc._id,
+            request: {
+              type: "GET",
+              url: `http://localhost:${process.env.PORT}/products/${doc._id}`
+            }
+          };
+        })
+      };
+      res.status(200).json(response);
       // if (docs.length > 0) {
       //   res.status(200).json(docs);
       // } else {
@@ -94,7 +109,11 @@ router.patch("/:prodId", (req, res, next) => {
     updateOps[ops.propName] = ops.value;
   }
 
-  Product.findByIdAndUpdate({ _id: req.params.prodId }, { $set: updateOps })
+  Product.findByIdAndUpdate(
+    { _id: req.params.prodId },
+    { $set: updateOps },
+    { useFindAndModify: false }
+  )
     .exec()
     .then(result => {
       console.log(result);
