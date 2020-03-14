@@ -42,7 +42,7 @@ const Product = require("../models/product");
 router.get("/", (req, res, next) => {
   // where, limit, etc are valid params here
   Product.find()
-    .select("name price _id")
+    .select("name price _id productImage")
     .exec()
     .then(docs => {
       const response = {
@@ -51,6 +51,7 @@ router.get("/", (req, res, next) => {
           return {
             name: doc.name,
             price: doc.price,
+            productImage: doc.productImage,
             _id: doc._id,
             request: {
               type: "GET",
@@ -78,7 +79,7 @@ router.get("/", (req, res, next) => {
 router.get("/:prodId", (req, res, next) => {
   const id = req.params.prodId;
   Product.findById(id)
-    .select("name price _id")
+    .select("name price _id productImage")
     .exec()
     .then(doc => {
       console.log(doc);
@@ -112,7 +113,8 @@ router.post("/", upload.single("productImage"), (req, res, next) => {
   const product = new Product({
     _id: new mongoose.Types.ObjectId(),
     name,
-    price
+    price,
+    productImage: req.file.path
   });
 
   product

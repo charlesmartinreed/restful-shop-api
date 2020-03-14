@@ -24,7 +24,8 @@ app.use(logger("dev")); // running morgan logger in "dev" mode - logs in the con
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-// app.use(express.static("uploads/"));
+// publically exposes the uploads folder for any requests made to the uploads folder route
+app.use("/uploads", express.static("uploads"));
 
 // CORS FIX
 app.use((req, res, next) => {
