@@ -37,6 +37,9 @@ router.get("/:orderId", (req, res, next) => {
   Order.findById(req.params.orderId)
     .select("quantity _id product")
     .then(order => {
+      if (!order) {
+        return res.status(404).json({ message: "No order found for that ID" });
+      }
       res.status(200).json({
         order,
         request: {
