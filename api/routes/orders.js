@@ -3,6 +3,7 @@ const router = express.Router();
 const mongoose = require("mongoose");
 
 const Order = require("../models/orders");
+const Product = require("../models/product");
 
 // ORDERS - GET all
 router.get("/", (req, res, next) => {
@@ -43,32 +44,47 @@ router.get("/:orderId", (req, res, next) => {
 router.post("/", (req, res, next) => {
   const { productId, quantity } = req.body;
 
-  const order = new Order({
-    _id: mongoose.Types.ObjectId(),
-    quantity,
-    product: productId
-  });
+  // first, check if we have a product for a given id
+  Product.findById(productId)
+    .then(product => {
+      if (!product) {
+        return res.status(404).json({
+          message: "No product found with that ID"
+        });
+      }
+      const order = new Order({
+        _id: mongoose.Types.ObjectId(),
+        quantity,
+        product: productId
+      });
 
-  order
-    .save()
+      return order.save();
+    })
     .then(result => {
       // contains order id AND product id
       console.log(result);
-      res.status(201).json(result);
-    })
-    .catch(error => {
-      console.log(error);
-      res.status(500).json({
-        error
-      });
+      res
+        .status(201)
+        .json({
+          message: "Order stored",
+          createdOrder: {
+            _id: result._id,
+            product: result.product,
+            quantity: result.quantity
+          },
+          request: {
+            type: "GET",
+            url: `http://localhost:${process.env.PORT}/orders/${result._id}`
+          }
+        })
+        .catch(error => {
+          console.log(error);
+          res.status(500).json({
+            error
+          });
+        });
     });
-
-  // res.status(201).json({
-  //   message: "New order was created!",
-  //   order: { productId, quantity }
-  // });
 });
-
 // DELETE - remove order by id
 router.delete("/:orderId", (req, res, next) => {
   res.status(200).json({
