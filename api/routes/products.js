@@ -1,12 +1,44 @@
 const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
-const url = require("url");
+const multer = require("multer");
+
+// MULTER CONFIG
+const storage = multer.diskStorage({
+  // where to save incoming file
+  destination: function(req, file, cb) {
+    cb(null, "./uploads/");
+  },
+  // how the incoming file is named
+  filename: function(req, file, cb) {
+    cb(null, new Date().toISOString() + file.originalname);
+  }
+});
+
+// FILE TYPE RESTRICTIONS
+const fileFilter = (req, file, cb) => {
+  const validTypes = ["image/jpeg", "image/png"];
+  if (validTypes.indexOf(file.mimetype) != -1) {
+    cb(null, true);
+  } else {
+    // reject the file, no error
+    cb(null, false);
+  }
+};
+// init multer with config, passing along the upload destination for parsed form data - path here is relative
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 1024 * 1024 * 10
+  },
+  fileFilter: fileFilter
+});
 
 // import our Product model
 const Product = require("../models/product");
 
 // PRODUCTS -- GET all
+// is a middleware/handler used to capture the uploaded image
 router.get("/", (req, res, next) => {
   // where, limit, etc are valid params here
   Product.find()
@@ -72,25 +104,16 @@ router.get("/:prodId", (req, res, next) => {
 });
 
 // PRODUCTS -- POST
-router.post("/", (req, res, next) => {
+router.post("/", upload.single("productImage"), (req, res, next) => {
+  // req.file made avaiable by our upload.single call
+  console.log(req.file);
+
   const { name, price } = req.body;
   const product = new Product({
     _id: new mongoose.Types.ObjectId(),
     name,
     price
   });
-
-  // try {
-  //   const result = await product.save();
-  //   console.log(result);
-
-  //   return res.status(201).json({
-  //     message: "POST request to /products handled",
-  //     createdProduct: product
-  //   });
-  // } catch (err) {
-  //   console.log(err);
-  // }
 
   product
     .save()

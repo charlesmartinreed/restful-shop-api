@@ -24,6 +24,8 @@ app.use(logger("dev")); // running morgan logger in "dev" mode - logs in the con
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
+// app.use(express.static("uploads/"));
+
 // CORS FIX
 app.use((req, res, next) => {
   // add the neccessary headers when a res is sent - * allows access to any client
