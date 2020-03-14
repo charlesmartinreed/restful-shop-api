@@ -34,10 +34,20 @@ router.get("/", (req, res, next) => {
 
 // ORDERS - GET by id
 router.get("/:orderId", (req, res, next) => {
-  res.status(200).json({
-    message: `GET request for order #${req.params.orderId} received on orders route`,
-    id: req.params.orderId
-  });
+  Order.findById(req.params.orderId)
+    .select("quantity _id product")
+    .then(order => {
+      res.status(200).json({
+        order,
+        request: {
+          type: "GET",
+          url: `http://localhost:${process.env.PORT}/orders`
+        }
+      });
+    })
+    .catch(error => {
+      res.status(500).json({ error });
+    });
 });
 
 // ORDERS - POST new order
@@ -87,9 +97,17 @@ router.post("/", (req, res, next) => {
 });
 // DELETE - remove order by id
 router.delete("/:orderId", (req, res, next) => {
-  res.status(200).json({
-    message: "Order was deleted",
-    id: req.params.orderId
-  });
+  Order.findByIdAndDelete({ _id: req.params.orderId })
+    .then(result => {
+      res.status(200).json({
+        message: "Order was successfully deleted",
+        request: {
+          type: "POST",
+          url: `http://localhost:${process.env.PORT}/orders`,
+          body: { productId: "ID", quantity: "Number" }
+        }
+      });
+    })
+    .catch(error => res.status(500).json({ error }));
 });
 module.exports = router;
