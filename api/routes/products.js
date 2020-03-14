@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
 const multer = require("multer");
+const auth = require("../auth/check-auth");
 
 // MULTER CONFIG
 const storage = multer.diskStorage({
@@ -105,7 +106,7 @@ router.get("/:prodId", (req, res, next) => {
 });
 
 // PRODUCTS -- POST
-router.post("/", upload.single("productImage"), (req, res, next) => {
+router.post("/", auth, upload.single("productImage"), (req, res, next) => {
   // req.file made avaiable by our upload.single call
   console.log(req.file);
 
@@ -141,7 +142,7 @@ router.post("/", upload.single("productImage"), (req, res, next) => {
 });
 
 // PRODUCTS -- PATCH
-router.patch("/:prodId", (req, res, next) => {
+router.patch("/:prodId", auth, (req, res, next) => {
   const id = req.params.productId;
 
   // creating a dynamic object that captures the altered values from the request params
@@ -176,7 +177,7 @@ router.patch("/:prodId", (req, res, next) => {
   // });
 });
 
-router.delete("/:prodId", (req, res, next) => {
+router.delete("/:prodId", auth, (req, res, next) => {
   const id = req.params.prodId;
 
   Product.findByIdAndDelete({ _id: id })

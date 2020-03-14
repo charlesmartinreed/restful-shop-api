@@ -1,12 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
+const auth = require("../auth/check-auth");
 
 const Order = require("../models/orders");
 const Product = require("../models/product");
 
 // ORDERS - GET all
-router.get("/", (req, res, next) => {
+router.get("/", auth, (req, res, next) => {
   Order.find()
     .select("product quantity _id")
     .then(docs => {
@@ -33,7 +34,7 @@ router.get("/", (req, res, next) => {
 });
 
 // ORDERS - GET by id
-router.get("/:orderId", (req, res, next) => {
+router.get("/:orderId", auth, (req, res, next) => {
   Order.findById(req.params.orderId)
     .select("quantity _id product")
     .then(order => {
@@ -54,7 +55,7 @@ router.get("/:orderId", (req, res, next) => {
 });
 
 // ORDERS - POST new order
-router.post("/", (req, res, next) => {
+router.post("/", auth, (req, res, next) => {
   const { productId, quantity } = req.body;
 
   // first, check if we have a product for a given id
@@ -99,7 +100,7 @@ router.post("/", (req, res, next) => {
     });
 });
 // DELETE - remove order by id
-router.delete("/:orderId", (req, res, next) => {
+router.delete("/:orderId", auth, (req, res, next) => {
   Order.findByIdAndDelete({ _id: req.params.orderId })
     .then(result => {
       res.status(200).json({
