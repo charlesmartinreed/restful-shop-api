@@ -6,6 +6,8 @@ const config = require("dotenv").config();
 
 const productRoutes = require("./api/routes/products");
 const orderRoutes = require("./api/routes/orders");
+const userRoutes = require("./api/routes/user");
+
 // console.log(process.env.DB_USER, process.env.DB_PASS);
 // mongoose db connection
 mongoose.connect(
@@ -50,6 +52,7 @@ app.use((req, res, next) => {
 
 app.use("/products", productRoutes);
 app.use("/orders", orderRoutes);
+app.use("/user", userRoutes);
 
 // NON-SUPPORTED ROUTES
 app.use((req, res, next) => {
